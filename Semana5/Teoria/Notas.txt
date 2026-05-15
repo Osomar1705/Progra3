@@ -1,0 +1,87 @@
+================================================================
+    APUNTES COMPLETOS: CONTENEDORES Y ITERADORES EN C++
+           (CS2013: Programación - Teoría) [cite: 1399]
+================================================================
+
+1. CONCEPTOS GENERALES
+----------------------------------------------------------------
+Un contenedor almacena objetos del mismo tipo[cite: 1400]. 
+Existen dos categorías principales:
+* Contenedores Secuenciales: Permiten controlar el orden en el que se accede e insertan los elementos. El orden representa la posición[cite: 1401].
+* Contenedores Asociativos: Almacenan sus elementos utilizando el concepto de clave (key) o pares clave-valor (key-value)[cite: 1402].
+
+
+2. CONTENEDORES SECUENCIALES
+----------------------------------------------------------------
+a) vector
+   - Acceso: Rápido acceso a cualquier elemento[cite: 1403].
+   - Memoria: Almacena los elementos de forma contigua[cite: 1424].
+   - Inserción/Eliminación: Costosa si no es en el último elemento (insertar/remover en el medio tiene costo computacional)[cite: 1404, 1425].
+
+b) list (Lista doblemente enlazada)
+   - Acceso: Secuencial bidireccional[cite: 1406].
+   - Inserción/Eliminación: Rápido en cualquier posición (está optimizado para esto)[cite: 1407, 1427].
+
+c) forward_list (Lista simplemente enlazada)
+   - Acceso: Secuencial en una sola dirección[cite: 1409].
+   - Inserción/Eliminación: Rápido en cualquier elemento[cite: 1410].
+   - Operaciones exclusivas: 
+     * insert_after() -> Inserta un elemento después de un iterador[cite: 1428].
+     * push_front() / pop_front() -> Añadir o    al inicio[cite: 1429].
+     * remove(val) -> Elimina todas las ocurrencias de un valor[cite: 1433].
+     * remove_if() -> Elimina elementos mediante una función lambda (ej. pares)[cite: 1433].
+
+d) array
+   - Acceso: Rápido a cualquier elemento[cite: 1410].
+   - Limitación: Tamaño fijo, no se pueden añadir ni eliminar elementos[cite: 1411, 1424].
+
+e) string
+   - Acceso: Rápido a cualquier elemento. Almacena de forma contigua[cite: 1412, 1424].
+   - Inserción/Eliminación: Rápido al final, pero costoso en el medio[cite: 1412, 1425].
+
+
+3. ITERADORES
+----------------------------------------------------------------
+Un iterador es un objeto que permite navegar a través de los elementos de un contenedor[cite: 1415].
+- begin(): Apunta al principio del contenedor[cite: 1416].
+- end(): Apunta a una posición DESPUÉS del final del contenedor[cite: 1416].
+
+Operaciones básicas permitidas en todos los iteradores[cite: 1419]:
+  *it         -> Desreferencia: Obtiene el elemento apuntado.
+  it->mem     -> Accede al miembro 'mem' del elemento apuntado.
+  ++it        -> El iterador ahora apuntará al siguiente elemento.
+  --it        -> El iterador ahora apuntará al elemento previo.
+  it1 == it2  -> Verdadero si apuntan al mismo elemento o ambos apuntan a end().
+  it1 != it2  -> Verdadero si apuntan a posiciones distintas.
+
+Operaciones avanzadas (Solo para 'vector' y 'string')[cite: 1421]:
+  it + n / it - n  -> Avanza o retrocede "n" elementos.
+  it += n / it -= n -> Equivalente a lo anterior.
+  it1 - it2        -> Distancia entre dos iteradores.
+  <, <=, >, >=     -> Permite saber si un iterador está antes que otro.
+
+
+4. CONTENEDORES ASOCIATIVOS
+----------------------------------------------------------------
+Los elementos se almacenan y recuperan mediante una clave (key)[cite: 1434].
+
+a) map
+   - Estructura: map<key, value> (Ej. map<string, int>)[cite: 1434, 1436].
+   - Comportamiento: Si la clave no se encuentra en el contenedor al intentar acceder (ej. map[key]++), se creará un nuevo elemento con un valor por defecto (como 0) y luego se operará[cite: 1444].
+   - Iteración: Al iterar en un map (con auto &w : word_count), 'w.first' obtiene la clave y 'w.second' obtiene el valor[cite: 1451, 1452].
+
+b) set
+   - Estructura: Almacena elementos únicos. ¡No cuenta ni guarda elementos repetidos![cite: 1469].
+   - Búsqueda: Se utiliza el método find(). Si no encuentra el elemento, retorna set.end()[cite: 1460].
+   - Inicialización rápida: Puedes inicializar un set directamente con los elementos de un vector usando: 
+     set<int> s(v.begin(), v.end()); [cite: 1470]
+
+
+5. RESUMEN: ¿QUÉ CONTENEDOR USAR?
+----------------------------------------------------------------
+- Usa 'array' si el tamaño es fijo y conocido[cite: 1424].
+- Usa 'vector' o 'string' por defecto, ya que su almacenamiento es contiguo y el acceso es instantáneo, siempre y cuando no necesites insertar muchos elementos en el medio[cite: 1424, 1425].
+- Usa 'list' o 'forward_list' si necesitas hacer constantes inserciones y eliminaciones en el medio o al inicio, ya que están optimizados para ello[cite: 1427].
+- Usa 'map' para contadores, diccionarios o relacionar pares de datos[cite: 1434].
+- Usa 'set' para mantener un grupo de elementos únicos o hacer filtros rápidos[cite: 1455, 1469].
+================================================================

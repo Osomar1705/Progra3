@@ -1,0 +1,3 @@
+C:/Users/osman/OneDrive/Documents/Progra_3/Ec1/cmake-build-debug/CMakeFiles/Ec1.dir
+C:/Users/osman/OneDrive/Documents/Progra_3/Ec1/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/osman/OneDrive/Documents/Progra_3/Ec1/cmake-build-debug/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,83 @@
+Temas:
+-Conceptos de metaprogramación
+-metaprogramación del curso
+-Exercise
+
+
+--------
+Conceptos
+meta--> Autorreferencia
+programación-->Programar
+
+"La programación de la programación." (compile time (donde se esta compilado))
+hacer codigo para generar mas codigo
+
+Metaprogramming
+-Processor #ifdef,#include,..
+-templates: template<typename..>
+-constepr,variadic templates
+-type traits,Concepts
+-consteval, static reflection
+
+Proceso template:
+suma de dos tipos (a, b)
+return a + b
+
+plantilla,fun,clAA ---> compilador gencode ----> specializaciones
+
+strict typing ploblem:
+-int tiene un size fijo
+-double tiene un size fijo
+-float tiene un size fijo
+
+###########
+
+plantillas definiciones:
+
+template<typename T>
+T sum_one(T t){
+    return t+1,
+}
+
+int main(){
+    auto a = ......// cuando hago sum_one(1)/no llama al templete;
+    auto b= ....// sim_one<std::string>("A")
+}
+
+
+/////
+Tipos de template
+template no-tipo:
+tempate<int N> ==> es una constante con tipo defenido
+
+template de templete://
+template <template<typename>typename container>
+==> Container es un tipo genérico consigo container
+T -> Generico
+pero ahora con un tipo adendro
+==> Container<T>
+template <template <typename...>typename Container>
+container <T1,T2,t3>
+
+Se puede definir un tipo default:
+template<typename T= int>
+T sum_two(T t){
+    retur t+2
+}
+
+
+///variadic
+
+template<typenam... Ts> ==> Ts es un paque de tipos, pueden ser distintos
+ejemplo:
+sum_total<int, int, int , floar , double>
+
+template <typename....Ts>
+ins sum_total(Ts...ts){
+    int sum = ()// folling expresion 
+    retun sum
+
+}
+
+auto concexpr();//
+int sum auto

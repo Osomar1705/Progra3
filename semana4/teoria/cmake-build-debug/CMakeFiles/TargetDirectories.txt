@@ -1,0 +1,3 @@
+C:/Users/osman/OneDrive/Documents/Progra_3/semana4/teoria/cmake-build-debug/CMakeFiles/teoria.dir
+C:/Users/osman/OneDrive/Documents/Progra_3/semana4/teoria/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/osman/OneDrive/Documents/Progra_3/semana4/teoria/cmake-build-debug/CMakeFiles/rebuild_cache.dir

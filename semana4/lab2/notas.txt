@@ -1,0 +1,15 @@
+1)primer ejercicio implementar la derivada de una función, analizarlo
+2)buble sort esta gozu quiero aprender gaaaaa, 
+2.1)add rectangulo(logica del  El algoritmo de Bubble Sort (o de burbuja) 
+es uno de los métodos de ordenamiento más sencillos de entender, ya que imita la forma en que las
+ burbujas de aire suben a la superficie en un líquido.)
+ 3)Problemas de Functores , criptografia, pasos :
+  3.1)Definir la Clase del Functor:
+  Un functor es simplemente una clase que sobrecarga el operador de paréntesis operator().
+  Crea una clase llamada CifradoAfin.Define dos atributos privados de tipo entero para almacenar los coeficientes a y b.
+  3.2)Crear el Constructor:
+  Debe recibir dos parámetros (int _a, int _b).
+  3.3)Sobrecargar el Operador ()
+  3.4) Instanciar y Utilizar
+
+4)Exprecion land

@@ -1,0 +1,41 @@
+-----------------------busqueda Lineal--------------------
+LinealSEARCH(A,e):
+#A es una secuencia de numeros
+n =length(A)
+for i in {0,...,n-1}:
+    if A[i]==e:
+        return i        #found
+        
+return -1               #not found
+
+
+
+---------------buble sort ---------------------
+
+BUBBLESORT(A):
+# A es una secuencia de números
+n = length(A)
+for i in {0,...,n-1}:
+for j in {0,...,n-i-1}:
+if A[j] > A[j+1]:
+          temp = A[j]
+          A[j] = A[j+1]
+          A[j+1] = temp
+return A
+-----------------------------Frecuencia ------------------
+
+
+FRECUENCIA(P):
+#P es una secuencia de palabras
+Crear un mapa vacío freq
+for each palabra in P:
+if freq.find(palabra) == True:
+freq[palabra] = freq[palabra] + 1
+else:
+freq[palabra] = 1
+for each (key, value) in freq:
+print(key, "->", value)
+
+
+
+Ejerccicio 4 

@@ -1,0 +1,155 @@
+================================================================================
+           APUNTES EXTENDIDOS: COMPLEJIDAD ALGORÍTMICA I - INSERTION SORT & BIG-O
+================================================================================
+Estudiante: Osmar
+Institución: UTEC - Universidad de Ingeniería y Tecnología
+Referencias: CLRS (Introduction to Algorithms) y Teoría 7
+
+--------------------------------------------------------------------------------
+1. INVARIANTE DE BUCLE (LOOP INVARIANT)
+--------------------------------------------------------------------------------
+El invariante de bucle es una propiedad lógica fundamental que nos permite 
+demostrar formalmente que un algoritmo es correcto. No basta con probar con 
+algunos casos; en Ciencias de la Computación, requerimos certeza matemática.
+
+Para que una demostración por invariante de bucle sea válida, debe cumplir 
+estrictamente con tres pasos (similar a la inducción matemática):
+
+A. INICIALIZACIÓN (Caso Base): 
+   La propiedad debe ser verdadera justo ANTES de la primera iteración del bucle.
+   -> En Insertion Sort: Antes de empezar, nuestro subarreglo ordenado es A[0]. 
+      Como solo tiene un elemento, trivialmente ya está ordenado.
+
+B. MANTENIMIENTO (Paso Inductivo): 
+   Si la propiedad es verdadera antes de una iteración, debe seguir siendo 
+   verdadera ANTES de la siguiente iteración.
+   -> En Insertion Sort: En cada paso, el algoritmo toma el elemento A[j] y lo 
+      inserta en la posición correcta dentro de A[0...j-1]. Al terminar la 
+      iteración, el subarreglo A[0...j] contiene los mismos elementos originales 
+      pero ahora ordenados.
+
+C. TERMINACIÓN: 
+   Cuando el bucle for o while termina, el invariante nos proporciona una 
+   conclusión útil que demuestra que el algoritmo resolvió el problema.
+   -> En Insertion Sort: El bucle for termina cuando j = n (tamaño del arreglo). 
+      Si aplicamos el invariante, concluimos que el subarreglo A[0...n-1] 
+      está ordenado. Dado que A[0...n-1] es el arreglo completo, el algoritmo 
+      ha ordenado con éxito toda la entrada.
+
+--------------------------------------------------------------------------------
+2. ALGORITMO: INSERTION SORT (ORDENAMIENTO POR INSERCIÓN)
+--------------------------------------------------------------------------------
+La mejor analogía (del libro CLRS) es ordenar una mano de cartas. Mantienes 
+las cartas ordenadas en tu mano izquierda, tomas una nueva carta con la mano 
+derecha, y la insertas en su posición correcta de derecha a izquierda.
+
+CÓDIGO C++ (Estructura Clásica):
+--------------------------------
+void insertion_sort(std::vector<int>& v) {
+    // Empezamos en j=1 porque el elemento v[0] se considera el "subarreglo" 
+    // inicial ya ordenado.
+    for (int j = 1; j < v.size(); j++) {
+        int key = v[j];    // El elemento que vamos a insertar
+        int i = j - 1;     // Empezamos a comparar con el elemento anterior
+
+        // Desplazamos a la derecha todos los elementos de la sección ordenada 
+        // que sean mayores a 'key'.
+        while (i >= 0 && v[i] > key) {
+            v[i+1] = v[i];
+            i--;
+        }
+        // Insertamos la 'key' en el espacio que hemos liberado
+        v[i+1] = key; 
+    }
+}
+
+--------------------------------------------------------------------------------
+3. ANÁLISIS ASINTÓTICO (NOTACIÓN BIG-O)
+--------------------------------------------------------------------------------
+La complejidad algorítmica NO mide el tiempo de ejecución en segundos 
+(ya que eso depende de si usas una PC antigua o un clúster de servidores). 
+Mide la TASA DE CRECIMIENTO: cómo aumenta el número de operaciones a medida 
+que el tamaño de la entrada (n) crece hacia el infinito.
+
+DEFINICIÓN FORMAL MATEMÁTICA:
+T(n) = O(g(n)) significa que g(n) es una COTA SUPERIOR asintótica.
+Debe cumplirse que: 0 <= T(n) <= c * g(n) 
+para todo n >= n0 (donde 'c' y 'n0' son constantes estrictamente positivas).
+
+--------------------------------------------------------------------------------
+4. JERARQUÍA DE COMPLEJIDADES (ANÁLISIS PROFUNDO)
+--------------------------------------------------------------------------------
+
+[O(1)] - TIEMPO CONSTANTE:
+- Concepto: El número de operaciones NO depende del tamaño de la entrada (n).
+- Comportamiento: El tiempo de ejecución es prácticamente una línea horizontal plana.
+- Detalles Clave: Como mencionaste en tus apuntes, el tiempo real en segundos 
+  depende del hardware de la computadora, pero a nivel de operaciones, siempre 
+  toma un valor similar.
+- Ejemplos prácticos: 
+  * Acceder a un elemento en un array por su índice: v[5]
+  * Operaciones nativas como v.push_back() en C++ (en promedio/costo amortizado, 
+    agregar un elemento al final de un vector toma tiempo constante).
+  * Evaluar si un número es par o impar.
+
+[O(log n)] - TIEMPO LOGARÍTMICO:
+- Concepto: En cada iteración, el algoritmo reduce el espacio del problema a 
+  una fracción (usualmente a la mitad).
+- Comportamiento: Crece MUY lentamente. Es extremadamente eficiente para n grandes.
+- Ejemplos prácticos:
+  * Búsqueda Binaria: Si n = 8, toma máximo 3 pasos (log2(8) = 3). Si n = 1,024, 
+    toma solo 10 pasos. Si n = 1 millón, ¡toma solo unos 20 pasos!
+  * Operaciones en árboles binarios de búsqueda balanceados.
+
+[O(n)] - TIEMPO LINEAL:
+- Concepto: El número de operaciones crece directamente proporcional al tamaño 
+  de la entrada 'n'.
+- Comportamiento: Si duplicas la entrada, duplicas el tiempo de ejecución. 
+  Si procesar 100 elementos toma 'X' operaciones, procesar 1,000 elementos 
+  tomará '10X' operaciones.
+- Ignorando Constantes: Si tu código tiene 3 bucles 'for' no anidados que recorren 
+  el vector (3n operaciones), en Big-O ignoramos el coeficiente y sigue siendo O(n).
+- Ejemplos prácticos:
+  * Búsqueda Lineal (Linear Search).
+  * Encontrar el valor máximo o mínimo en un arreglo no ordenado.
+  * Sumar todos los elementos de un std::vector.
+
+[O(n log n)] - TIEMPO LINEAL-LOGARÍTMICO:
+- Concepto: Es el límite teórico de eficiencia para los algoritmos de ordenamiento 
+  basados en comparaciones.
+- Ejemplos: Merge Sort, Heap Sort, y el caso promedio de Quick Sort.
+
+[O(n^2)] - TIEMPO CUADRÁTICO:
+- Concepto: El trabajo es proporcional al cuadrado del tamaño de la entrada. 
+- Alerta de Ineficiencia: Estos algoritmos no escalan bien para n grandes.
+- Comportamiento: Si n = 100, realiza ~10,000 operaciones. Si aumentamos n a 1,000 
+  (un incremento de x10), las operaciones saltan a 1,000,000 (un incremento de x100).
+- Origen: Se genera típicamente al utilizar bucles anidados. Por cada elemento 
+  'n' en el primer bucle, iteramos 'n' veces en el segundo bucle.
+- Ejemplos prácticos:
+  * Insertion Sort (en el peor de los casos).
+  * Bubble Sort, Selection Sort.
+  * Recorrer una matriz cuadrada n x n entera.
+
+--------------------------------------------------------------------------------
+5. ANÁLISIS DE CASOS: INSERTION SORT
+--------------------------------------------------------------------------------
+Insertion Sort es interesante porque su tiempo de ejecución varía radicalmente 
+dependiendo de la distribución inicial de los datos:
+
+-> MEJOR CASO (Best Case): El arreglo ya está completamente ordenado.
+   El bucle 'for' externo se ejecuta 'n' veces, pero la condición del bucle 
+   'while' interno (v[i] > key) es FALSA desde el primer momento en cada paso.
+   Complejidad: O(n) (Tiempo Lineal).
+
+-> PEOR CASO (Worst Case): El arreglo está ordenado al revés (de mayor a menor).
+   Para cada elemento en el bucle 'for', el bucle 'while' tiene que desplazar 
+   TODA la sublista ordenada a la izquierda.
+   Es decir, en el paso j, hace j comparaciones. La suma 1 + 2 + 3 + ... + n 
+   es una progresión aritmética que resulta en (n*(n-1))/2.
+   Ignorando constantes y términos menores, la Complejidad es: O(n^2).
+
+-> CASO PROMEDIO (Average Case): 
+   Se asume que los elementos están en orden aleatorio. En promedio, cada 
+   elemento tiene que desplazarse a través de la mitad de la sección ordenada.
+   Esto sigue siendo cuadrático: O(n^2).
