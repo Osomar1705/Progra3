@@ -1,0 +1,226 @@
+======================================================
+CHEAT SHEET: CONCURRENCIA EN C++ (NIVEL PRO)
+======================================================
+
+======================================================
+1. CONCEPTOS CLAVE (AL GRANO)
+======================================================
+* Síncrono vs. Asíncrono: 
+  - Síncrono: Bloquea el hilo esperando que termine la tarea.
+  - Asíncrono: No bloquea; el hilo delega la tarea y sigue ejecutando otra cosa.
+
+* Concurrencia vs. Paralelismo: 
+  - Concurrencia: Diseño. Gestionar múltiples tareas (pueden intercalarse en 1 solo núcleo).
+  - Paralelismo: Hardware. Ejecutar múltiples tareas físicamente al mismo tiempo (requiere multi-core).
+
+* Race Condition: Error crítico donde 2+ hilos leen/modifican la misma porción de memoria simultáneamente, corrompiendo los datos.
+* Sección Crítica: La línea o bloque de código exacto donde se accede al dato compartido.
+
+
+======================================================
+2. RACE CONDITION (EL PROBLEMA)
+======================================================
+Si dos hilos ejecutan esto sin protección, el contador final será impredecible.
+
+int counter = 0; // Recurso compartido
+
+void incrementar_inseguro() {
+    for (int i = 0; i < 100000; ++i) {
+        counter++; // <-- SECCIÓN CRÍTICA
+    }
+}
+
+
+======================================================
+3. MUTEX (LA SOLUCIÓN A LA RACE CONDITION)
+======================================================
+Mecanismo para asegurar exclusión mutua. Solo un hilo entra a la sección crítica a la vez.
+
+► PRO TIP: NUNCA uses `mtx.lock()` y `mtx.unlock()` manualmente. Si ocurre una excepción antes del `unlock()`, tu programa sufrirá un "Deadlock" (bloqueo infinito). Usa SIEMPRE `std::lock_guard` (patrón RAII), que libera el mutex automáticamente al salir de la función, incluso si hay errores.
+
+#include <mutex>
+
+int counter = 0;
+std::mutex mtx; 
+
+void incrementar_seguro() {
+    for (int i = 0; i < 100000; ++i) {
+        std::lock_guard<std::mutex> lock(mtx); // Se bloquea aquí
+        counter++; 
+    } // Se desbloquea automáticamente al terminar cada iteración
+}
+
+
+======================================================
+4. EJEMPLO PRO: TRANSACCIONES BANCARIAS
+======================================================
+El mutex protege el balance total cuando hay múltiples depósitos/retiros simultáneos.
+
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <chrono>
+
+int saldoCuenta = 1000;
+std::mutex mutexCuenta;
+
+void transaccion(int monto) {
+    // Simulamos trabajo de red/DB
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    // Bloqueo seguro (RAII)
+    std::lock_guard<std::mutex> lock(mutexCuenta);
+    
+    saldoCuenta += monto;
+    std::cout << (monto > 0 ? "Depósito: " : "Retiro: ") 
+              << monto << " | Saldo actual: " << saldoCuenta << '\n';
+}
+
+// En el main: thread t1(transaccion, 500); thread t2(transaccion, -200);
+
+
+======================================================
+5. FUTURE Y PROMISE (COMUNICACIÓN ENTRE HILOS)
+======================================================
+Para mover datos (o excepciones) de un hilo a otro de forma asíncrona (one-shot).
+- Promise: Productor. Promete enviar un dato en el futuro.
+- Future: Consumidor. Espera pasivamente y obtiene el dato cuando el Promise lo envía.
+
+► PRO TIP: Excelente para delegar cálculos pesados al background sin bloquear la UI o el hilo principal hasta que realmente necesites el resultado.
+
+#include <future>
+#include <thread>
+#include <iostream>
+
+void calcular(std::promise<int>&& prom, int base) {
+    prom.set_value(base * base); // 2. El productor cumple la promesa
+}
+
+int main() {
+    std::promise<int> promesa;
+    std::future<int> resultado = promesa.get_future(); 
+
+    // 1. Lanzamos el hilo en background
+    std::thread t(calcular, std::move(promesa), 10);
+
+    // ... el main puede hacer otras cosas aquí ...
+
+    // 3. Obtenemos el valor (bloquea solo si el hilo aún no termina)
+    std::cout << "Resultado: " << resultado.get() << '\n';
+
+    t.join();
+    return 0;
+}
+======================================================
+6. STD::ASYNC (ASINCRONÍA DE ALTO NIVEL)
+======================================================
+Es la forma moderna y recomendada en C++ para ejecutar tareas asíncronas que retornan un valor. Oculta la complejidad de crear hilos (`std::thread`) y promesas (`std::promise`) manualmente.
+
+Simplemente le pasas una función, y te devuelve un `std::future` directamente.
+
+* Políticas de lanzamiento (Launch Policies):
+  - std::launch::async: Obliga a que la tarea se ejecute concurrentemente en un NUEVO hilo.
+  - std::launch::deferred: Ejecución perezosa (Lazy evaluation). La tarea no se ejecuta hasta que llamas a `.get()` o `.wait()` en el future, y lo hace en el MISMO hilo que lo llamó.
+
+► PRO TIP: Usa `std::async` por defecto si necesitas retornar un valor de un hilo. Deja `std::thread` solo para tareas en background que no retornan nada (fire-and-forget).
+
+
+======================================================
+7. EJEMPLO PRO: STD::ASYNC
+======================================================
+#include <iostream>
+#include <future>
+#include <chrono>
+
+int operacionCostosa(int a, int b) {
+    std::this_thread::sleep_for(std::chrono::seconds(1)); // Simulamos carga
+    return a + b;
+}
+
+int main() {
+    // Lanzamos la tarea en un hilo separado inmediatamente
+    std::future<int> resultado = std::async(std::launch::async, operacionCostosa, 10, 20);
+
+    // ... el main no se bloquea y puede hacer otras cosas aquí ...
+    std::cout << "Haciendo otro trabajo en el main...\n";
+
+    // Extraemos el resultado (aquí sí bloquea si el hilo aún no termina)
+    std::cout << "Resultado final: " << resultado.get() << '\n';
+    
+    return 0;
+}
+
+
+======================================================
+8. STD::PACKAGED_TASK (EMPAQUETANDO TAREAS)
+======================================================
+Es un "wrapper" (envoltorio) que permite encapsular cualquier función o lambda para que pueda ser invocada de forma asíncrona. 
+
+Diferencia clave con `std::async`: 
+`std::packaged_task` NO inicia la ejecución automáticamente. Tú decides CÓMO y CUÁNDO se ejecuta (por ejemplo, pasándola a un `std::thread` manual o metiéndola en un Thread Pool).
+
+* Flujo de trabajo:
+  1. Empaquetas la función.
+  2. Extraes su `std::future`.
+  3. Ejecutas la tarea (ya sea invocándola directamente o pasándola a un hilo).
+
+
+======================================================
+9. EJEMPLO PRO: STD::PACKAGED_TASK
+======================================================
+#include <iostream>
+#include <future>
+#include <thread>
+
+int multiplicar(int a, int b) {
+    return a * b;
+}
+
+int main() {
+    // 1. Empaquetamos la función (definimos la firma <int(int, int)>)
+    std::packaged_task<int(int, int)> tarea(multiplicar);
+
+    // 2. Extraemos el future ANTES de ejecutar
+    std::future<int> resultado = tarea.get_future();
+
+    // 3. Ejecutamos la tarea en un hilo explícito 
+    // (Usamos std::move porque los packaged_task no se pueden copiar)
+    std::thread t(std::move(tarea), 5, 10);
+
+    // Obtenemos el valor
+    std::cout << "Resultado del empaquetado: " << resultado.get() << '\n';
+
+    t.join();
+    return 0;
+}   
+
+
+herramienta Promise
+
+En conjunto permiten la comunicación entre hilos.
+En conjunto permiten intercambiar valores o excepciones entre hilos.
+"promise" actúa como un contenedor para un valor que puede asignarse en el futuro.
+"future" representa el valor o la excepción que estará disponible en algún momento futuro.
+////#include <iostream>
+#include <future>
+
+int f1(){
+   int s1 = 0;
+   for (int i=0; i<100000000; i++)
+       s1 += 1;
+   return s1;
+}
+int f2(){
+   int s2 = 0;
+   for (int i=0; i<200000000; i++)
+       s2 += 1;
+   return s2;
+}
+
+int main(){
+   std::future<int> res = std::async(&f1);
+
+   std::cout << "Respuesta f2 = " << f2() << std::endl;
+   std::cout << "Respuesta f1 = " << res.get() << std::endl;
+}
+&/// analizarlo bien
